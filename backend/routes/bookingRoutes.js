@@ -2,29 +2,37 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 const multer = require("multer");
+const multerS3 = require("multer-s3");
+const s3 = require("../config/s3");
 
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  }
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: process.env.AWS_BUCKET_NAME,
+    acl: "public-read",
+    key: function (req, file, cb) {
+      cb(null, `dokumen/${Date.now()}-${file.originalname}`);
+    },
+  }),
 });
-
-const upload = multer({ storage });
 
 // Tambah Booking
 router.post("/", upload.single("file"), (req, res) => {
   const { nama, tanggal, keluhan } = req.body;
-  const file = req.file ? req.file.filename : null;
+  const fileUrl = req.file ? req.file.location : null;
 
-  const sql = "INSERT INTO bookings (nama, tanggal, keluhan, file) VALUES (?, ?, ?, ?)";
-  db.query(sql, [nama, tanggal, keluhan, file], (err, result) => {
+  const sql = `
+    INSERT INTO bookings (nama, tanggal, keluhan, file)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  db.query(sql, [nama, tanggal, keluhan, fileUrl], (err, result) => {
     if (err) return res.status(500).send(err);
-    res.send("Booking berhasil!");
+    res.json({ message: "Booking berhasil!", fileUrl });
   });
 });
 
-// Ambil Data Booking
+// Ambil Semua Booking
 router.get("/", (req, res) => {
   db.query("SELECT * FROM bookings", (err, results) => {
     if (err) return res.status(500).send(err);
