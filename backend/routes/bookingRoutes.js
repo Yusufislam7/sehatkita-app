@@ -8,8 +8,7 @@ const s3 = require("../config/s3");
 const upload = multer({
   storage: multerS3({
     s3: s3,
-    bucket: process.env.AWS_BUCKET_NAME,
-    acl: "public-read",
+    bucket: "sehatkita-yusuf-unique",
     key: function (req, file, cb) {
       cb(null, `dokumen/${Date.now()}-${file.originalname}`);
     },

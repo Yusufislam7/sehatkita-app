@@ -21,7 +21,7 @@ function Booking() {
     data.append("keluhan", form.keluhan);
     data.append("file", file);
 
-    await axios.post("http://localhost:5000/api/bookings", data);
+    await axios.post("http://54.254.56.237:5000/api/bookings", data);
     alert("Booking berhasil!");
   };
 
