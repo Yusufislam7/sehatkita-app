@@ -1,33 +1,16 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8
-    container_name: mysql_sehatkita
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: sehatkita_db
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-
   backend:
     build: ./backend
     container_name: backend_sehatkita
     ports:
       - "5000:5000"
-    depends_on:
-      - mysql
+    # Service MySQL dihapus karena kita pakai RDS AWS
     environment:
-      DB_HOST: mysql
-      DB_USER: root
-      DB_PASSWORD: root
-      DB_NAME: sehatkita_db
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
+      # Data ini akan diambil dari file .env yang kamu buat manual di server
+      NODE_ENV: production
+    restart: always
 
   frontend:
     build: ./frontend
@@ -36,9 +19,6 @@ services:
       - "3000:3000"
     depends_on:
       - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+    restart: always
 
-volumes:
-  mysql_data:
+# Volume mysql_data dihapus biar hemat disk space
